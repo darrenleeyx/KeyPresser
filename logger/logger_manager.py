@@ -24,3 +24,6 @@ class LoggerManager:
         
     def log_info(self, message):
         logging.info(message)
+
+    def log_error(self, exception):
+        logging.error(f"An error occurred: {exception}")
