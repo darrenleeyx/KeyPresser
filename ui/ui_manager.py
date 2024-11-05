@@ -1,11 +1,12 @@
 from tkinter import ttk, font as tkFont
 import tkinter as tk
+from tkinter import messagebox as mbox
 import ui.ui_constants as ui_const
 import constants as const
 import keys.key_constants as key_const
 from state.state import State
-import time
-
+from state.state_error_event import StateErrorEvent
+from state.state_changed_event import StateChangedEvent
 class UiManager:
     def __init__(self, root, state_manager):
         self.root = root
@@ -55,15 +56,21 @@ class UiManager:
         if self.start_button:
             self.start_button.config(text=text)
 
-    def wait_for_state_changed_event(self, event):
+    def state_changed_event_handler(self, event: StateChangedEvent):
         while not self.stop_event_listener:
-            state = event.wait() 
+            state = event.wait(timeout=0.5)
             if state == State.STARTED:
                 self.update_start_button_text("Stop")
             elif state == State.STOPPED:
                 self.update_start_button_text("Start")
             event.clear()
-            time.sleep(5/1000)
+
+    def state_error_event_handler(self, event: StateErrorEvent):
+        while not self.stop_event_listener:
+            message = event.wait(timeout=0.5)
+            if message:
+                mbox.showerror("Error", message)
+            event.clear()
 
     def stop_event_listener_thread(self):
         self.stop_event_listener = True
