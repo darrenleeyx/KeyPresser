@@ -14,28 +14,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
 
-    - name: Install dependencies
-      run: |
-        python -m venv venv
-        venv\Scripts\activate
-        pip install -r requirements.txt
-        pip install pyinstaller
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          venv\Scripts\activate
+          pip install -r requirements.txt
+          pip install pyinstaller
 
-    - name: Build executable
-      run: |
-        venv\Scripts\activate
-        pyinstaller --onefile main.py
+      - name: Build executable
+        run: |
+          venv\Scripts\activate
+          pyinstaller --onefile main.py --name key_presser.exe
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: key_presser_exe
-        path: dist/main.exe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: key_presser
+          path: |
+            dist/key_presser.exe
+            __logs__/
+            __resources__/
