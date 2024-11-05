@@ -25,13 +25,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          source venv\Scripts\activate
+          source venv/bin/activate
           pip install -r requirements.txt
           pip install pyinstaller
 
       - name: Build executable
         run: |
-          source venv\Scripts\activate
+          source venv/bin/activate
           pyinstaller --onefile main.py --name key_presser.exe
 
       - name: Create zip file
