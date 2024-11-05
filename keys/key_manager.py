@@ -65,7 +65,7 @@ class KeyManager:
         with self.lock:
             self.has_started = False
             
-        if self.thread:
+        if self.thread.is_alive():
             self.thread.join()
 
     def release_keys(self):
