@@ -31,7 +31,7 @@ jobs:
 
       - name: Build executable
         run: |
-          venv\Scripts\activate
+          source venv\Scripts\activate
           pyinstaller --onefile main.py --name key_presser.exe
 
       - name: Create zip file
