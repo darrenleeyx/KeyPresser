@@ -1,4 +1,4 @@
-import logging
+import logging, os
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
 
@@ -6,7 +6,15 @@ class LoggerManager:
     def __init__(self):
         self.setup()
 
+    def create_directory(self):
+        try:
+            if not os.path.exists("__logs__"):
+                os.makedirs("__logs__")
+        except FileExistsError:
+            pass
+
     def setup(self):
+        self.create_directory()
         current_date = datetime.now().strftime("%Y-%m-%d")
         log_handler = TimedRotatingFileHandler(f"__logs__/{current_date}.log", when="midnight", interval=1)
         log_handler.suffix = "%Y-%m-%d"
