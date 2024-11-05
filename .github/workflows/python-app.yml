@@ -36,7 +36,7 @@ jobs:
 
       - name: Create zip file
         run: |
-          zip -r key_presser.zip dist/key_presser __resources__
+          powershell Compress-Archive -Path dist/key_presser.exe,__resources__ -DestinationPath key_presser.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
