@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -25,13 +25,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          source venv/bin/activate
+          venv\Scripts\activate
           pip install -r requirements.txt
           pip install pyinstaller
 
       - name: Build executable
         run: |
-          source venv/bin/activate
+          venv\Scripts\activate
           pyinstaller --onefile main.py --name key_presser.exe
 
       - name: Create zip file
