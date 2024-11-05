@@ -1,26 +1,22 @@
 from pynput.keyboard import Controller, Key
-from tkinter import messagebox
 from threading import Thread, Lock
-import random
-import time
-import logging
+import random, time
 from keys.key_constants import keys, key_mapping
 
 keyboard = Controller()
 
 class KeyManager:
-    def __init__(self):
+    def __init__(self, logger_manager):
+        self.logger_manager = logger_manager
         self.has_started = False
         self.thread = None
         self.keys = keys
         self.key_mapping = key_mapping
         self.lock = Lock()
+        self.pressed_keys = set()
 
     def validate_key(self, key):
-        if key not in keys:
-            messagebox.showerror("Invalid Key", f"The key '{key}' is not valid.")
-            return False
-        return True
+        return key in keys
 
     def press_key(self, key, interval, alt_tab, random_delay):
         try:
@@ -29,8 +25,10 @@ class KeyManager:
                 keyboard.tap(actual_key)
                 if alt_tab:
                     with keyboard.pressed(Key.alt):
+                        self.pressed_keys.add(Key.alt)
                         keyboard.tap(Key.tab)
-                        
+                    self.pressed_keys.remove(Key.alt)
+
                 total_sleep_time = 0
                 while total_sleep_time < interval and self.has_started:
                     sleep_time = min(0.1, interval - total_sleep_time)  # Sleep in smaller increments
@@ -44,7 +42,7 @@ class KeyManager:
                         time.sleep(sleep_time)
                         total_sleep_time += sleep_time
         except Exception as e:
-            logging.error(f"Error in press_key: {e}")
+            self.logger_manager.log_error(e)
 
     def start_key_press(self, key, interval_ms, min_interval_ms, should_alt_tab, should_random_delay):
         if not self.validate_key(key):
@@ -58,21 +56,19 @@ class KeyManager:
             self.thread = Thread(target=self.press_key, args=(key, interval, should_alt_tab, should_random_delay))
             self.thread.start()
         except Exception as e:
-            logging.error(f"Error in start_key_press: {e}")
-            messagebox.showerror("Error", "An error occurred while starting the key press.")
+            self.logger_manager.log_error(e)
 
     def stop_key_press(self):
         with self.lock:
             self.has_started = False
             
-        if self.thread.is_alive():
+        if self.thread is not None and self.thread.is_alive():
             self.thread.join()
 
-    def release_keys(self):
-        for key in key_mapping.values():
+    def release_pressed_keys(self):
+        for key in self.pressed_keys:
             try:
                 keyboard.release(key)
             except Exception as e:
-                logging.error(f"Error releasing key {key}: {e}")
-
-key_manager = KeyManager()
+                self.logger_manager.log_error(e)
+        self.pressed_keys.clear()
