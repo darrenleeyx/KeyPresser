@@ -1,0 +1,1 @@
+MIN_INTERVAL_MS = 20
