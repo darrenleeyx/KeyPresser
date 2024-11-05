@@ -10,8 +10,8 @@ class StateChangedEvent:
         self.state = state
         self.event.set()
 
-    def wait(self):
-        self.event.wait()
+    def wait(self, timeout=None):
+        self.event.wait(timeout=timeout)
         return self.state
 
     def clear(self):
