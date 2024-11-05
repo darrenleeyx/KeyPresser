@@ -18,12 +18,13 @@ if not lock.acquire(blocking=False):
     sys.exit(1)
 
 try:
+    logger_manager = LoggerManager()
+
     if __name__ == "__main__":
         try:
             # Starting
             root = tk.Tk()
             key_manager = KeyManager()
-            logger_manager = LoggerManager()
             state_manager = StateManager(key_manager, logger_manager)
             ui_manager = UiManager(root, state_manager)
             event_listener_thread = Thread(target=ui_manager.wait_for_state_changed_event, args=(state_manager.state_changed_event,))
@@ -31,6 +32,7 @@ try:
             
             # Started
             root.mainloop()
+            
             # Closing
             ui_manager.stop_event_listener_thread()
             if event_listener_thread.is_alive():
@@ -38,7 +40,6 @@ try:
             key_manager.stop_key_press()
             key_manager.release_keys()
         except Exception as e:
-            print(f"An error occurred: {e}")
-            input("Press Enter to exit...")
+            logger_manager.log_error(e)
 finally:
     lock.release()
