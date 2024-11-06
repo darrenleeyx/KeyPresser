@@ -19,7 +19,9 @@ KeyPresser is a simple application designed to simulate key presses on your comp
    ```
 3. Install the required dependencies:
    ```sh
-   npm install
+   python -m venv venv
+   venv\Scripts\activate
+   pip install -r requirements.txt
    ```
 
 ## Usage
