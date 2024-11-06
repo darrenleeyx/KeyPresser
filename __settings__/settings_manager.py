@@ -21,20 +21,14 @@ class SettingsManager:
     def create_default_settings_file(self, file_path):
         default_settings = yaml.safe_load("""
         key_bindings:
-        - bind_from:
-        - f8
-        bind_to:
-        - ctrl
-        - c
-        enabled: true
-        name: copy
-        - bind_from:
-        - f9
-        bind_to:
-        - ctrl
-        - v
-        enabled: true
-        name: paste
+          - name: copy
+            bind_from: ['f8']
+            bind_to: ['ctrl', 'c']
+            enabled: true
+          - name: paste
+            bind_from: ['f9']
+            bind_to: ['ctrl', 'v']
+            enabled: true
         """)
         with open(file_path, 'w') as settings_file:
             yaml.safe_dump(default_settings, settings_file)
