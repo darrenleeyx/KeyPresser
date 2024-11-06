@@ -1,4 +1,5 @@
 from pynput.keyboard import Controller, Key
+from pynput import keyboard as kb
 from threading import Thread, Lock
 import random, time
 from keys.key_constants import keys, key_mapping
@@ -6,17 +7,36 @@ from keys.key_constants import keys, key_mapping
 keyboard = Controller()
 
 class KeyManager:
-    def __init__(self, logger_manager):
+    def __init__(self, logger_manager, settings_manager):
         self.logger_manager = logger_manager
+        self.settings_manager = settings_manager
         self.has_started = False
         self.thread = None
         self.keys = keys
         self.key_mapping = key_mapping
         self.lock = Lock()
         self.pressed_keys = set()
+        self.listener = None
+        self.key_bindings = settings_manager.key_bindings
+
+        if not self.validate_bindings(self.settings_manager.key_bindings):
+            self.logger_manager.log_error("Invalid key bindings.")
+            exit(1)
 
     def validate_key(self, key):
         return key in keys
+    
+    def validate_bindings(self, key_bindings):
+        seen_bind_from = set()
+        for key_binding in key_bindings:
+            if not key_binding.get('name') or not key_binding.get('bind_from') or not key_binding.get('bind_to') or not key_binding.get('enabled'):
+                return False
+            if set(key_binding['bind_from']).issubset(set(key_binding['bind_to'])):
+                return False
+            if any(bind_from in seen_bind_from for bind_from in key_binding['bind_from']):
+                return False
+            seen_bind_from.update(key_binding['bind_from'])
+        return True
 
     def press_key(self, key, interval, alt_tab, random_delay):
         try:
@@ -64,6 +84,27 @@ class KeyManager:
             
         if self.thread is not None and self.thread.is_alive():
             self.thread.join()
+
+    def start_listening(self):
+        self.listener = kb.Listener(on_press=self.on_press)
+        self.listener.start()
+
+    def stop_listening(self):
+        if self.listener is not None:
+            self.listener.stop()
+
+    def on_press(self, key):
+        try:
+            #self.logger_manager.log_info(f"Key pressed: {key}")
+            if hasattr(key, 'name'):
+                for binding in self.key_bindings:
+                    if key.name in binding.get('bind_from', []):
+                        keys_to_press = binding.get('bind_to', [])
+                        with keyboard.pressed(*[self.key_mapping.get(k, k) for k in keys_to_press]):
+                            #self.logger_manager.log_info(f"Simulating key press: {keys_to_press}")
+                            pass
+        except Exception as e:
+            self.logger_manager.log_error(e)
 
     def release_pressed_keys(self):
         for key in self.pressed_keys:
