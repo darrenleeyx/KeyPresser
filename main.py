@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from __settings__.settings_manager import SettingsManager
 from keys.key_manager import KeyManager
 from ui.ui_manager import UiManager
 from logger.logger_manager import LoggerManager
@@ -21,16 +22,19 @@ try:
 
     if __name__ == "__main__":
         try:
-            key_manager = KeyManager(logger_manager)
+            settings_manager = SettingsManager()
+            key_manager = KeyManager(logger_manager, settings_manager)
             state_manager = StateManager(key_manager, logger_manager)
             ui_manager = UiManager(root, state_manager)
             state_changed_event_polling_thread = Thread(target=ui_manager.state_changed_event_handler, args=(state_manager.state_changed_event,))
             state_error_event_polling_thread = Thread(target=ui_manager.state_error_event_handler, args=(state_manager.state_error_event,))
             state_changed_event_polling_thread.start()
             state_error_event_polling_thread.start()
+            key_manager.start_listening()
 
             root.mainloop()
 
+            key_manager.stop_listening()
             ui_manager.stop_event_listener_thread()
             if state_changed_event_polling_thread is not None and state_changed_event_polling_thread.is_alive():
                 state_changed_event_polling_thread.join()
