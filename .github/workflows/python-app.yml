@@ -34,12 +34,14 @@ jobs:
           venv\Scripts\activate
           pyinstaller --onefile --noconsole main.py --name key_presser.exe
 
-      - name: Create zip file
+      - name: Move executable
         run: |
-          powershell Compress-Archive -Path dist/key_presser.exe,__resources__ -DestinationPath key_presser.zip
+          move dist\key_presser.exe .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: key_presser
-          path: key_presser.zip
+          path: |
+            key_presser.exe
+            __resources__
