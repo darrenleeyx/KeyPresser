@@ -136,3 +136,6 @@ cython_debug/
 
 # Logs
 __logs__
+
+# Settings
+__settings__/settings.yaml
